@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
 import ResetPasswordPage from "./Pages/ResetPasswordPage";
-import Navbar from "./Components/Navbar";
-import LoggedoutPage from "./Pages/LoggedoutPage";
+import LoggedOutPage from "./Pages/LoggedOutPage";
+import Mainpage from "./Pages/Mainpage";
 
 
 const App = () => {
@@ -13,14 +13,10 @@ const App = () => {
       <Routes>
         {/* Redirect to login by default */}
         <Route path="*" element={<LoginPage />} />
-        <Route path="/home-page" element={<Navbar />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/logged-out" element={<LoggedoutPage/>} />
+        <Route path="/main-page" element={<Mainpage />} />
+        <Route path="/logged-out" element={<LoggedOutPage/>} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route
-          path="/reset-password/:id/:token"
-          element={<ResetPasswordPage />}
-        />
+        <Route path="/reset-password/:id/:token" element={<ResetPasswordPage />}  />
       </Routes>
     </Router>
   );

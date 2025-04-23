@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { FiLock, FiEye, FiEyeOff, FiUser } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -11,6 +13,7 @@ const LoginPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -20,16 +23,43 @@ const LoginPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("Logging in...", formData);
-    setTimeout(() => setLoading(false), 1500);
+    setError("");
+
+    try {
+      const response = await fetch("/api/ui/api1.0/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Login failed");
+      }
+
+      console.log("Login successful:", result);
+      localStorage.setItem("token", result.token); // ✅ Save token
+      navigate("/main-page");
+    } catch (error) {
+      console.error("Error logging in:", error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
-      {/* Top Left Logo */}
+      {/* Logo */}
       <div className="absolute top-10 left-20 z-50">
         <img
           src="https://www.autointelli.com/assets/img/hero-logo.webp"
@@ -38,7 +68,7 @@ const LoginPage = () => {
         />
       </div>
 
-      {/* Page Background */}
+      {/* Page */}
       <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
           <h2 className="mt-4 text-4xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-500 bg-clip-text text-transparent tracking-tight">
@@ -50,7 +80,7 @@ const LoginPage = () => {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-gray-800 py-10 px-6 shadow-2xl rounded-2xl sm:px-10 transition-all duration-300 ease-in-out">
+          <div className="bg-gray-800 py-10 px-6 shadow-2xl rounded-2xl sm:px-10">
             <form className="space-y-6" onSubmit={handleSubmit}>
               {/* Username */}
               <div>
@@ -71,7 +101,7 @@ const LoginPage = () => {
                     required
                     value={formData.username}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-800 transition duration-200"
+                    className="block w-full pl-10 pr-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-800"
                     placeholder="your_username"
                   />
                 </div>
@@ -97,7 +127,7 @@ const LoginPage = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-10 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-800 transition duration-200"
+                    className="block w-full pl-10 pr-10 py-2 rounded-lg border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-800"
                     placeholder="••••••••"
                   />
                   <button
@@ -109,9 +139,9 @@ const LoginPage = () => {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-200 transition" />
+                      <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-200" />
                     ) : (
-                      <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-200 transition" />
+                      <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-200" />
                     )}
                   </button>
                 </div>
@@ -131,12 +161,17 @@ const LoginPage = () => {
                 </label>
 
                 <Link
-                 to="/forgot-password"
+                  to="/forgot-password"
                   className="text-sm text-blue-300 hover:underline hover:text-blue-400"
                 >
                   Forgot password?
                 </Link>
               </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="text-red-400 text-sm text-center">{error}</div>
+              )}
 
               {/* Submit */}
               <div>
